@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request, abort, send_file
 from dotenv import load_dotenv
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import MessageEvent, PostbackEvent, TextMessage, TextSendMessage
 
 from fsm import TocMachine
 from utils import send_text_message
@@ -14,7 +14,8 @@ load_dotenv()
 
 
 machine = TocMachine(
-    states=["user", "startPage", "romance", "comedy", "horror"],
+    states=["user", "startPage", "romance",
+            "comedy", "horror", "terror", "school", "fighting", "movieDetail", "comicDetail", "final"],
     transitions=[
         {
             "trigger": "advance",
@@ -22,6 +23,7 @@ machine = TocMachine(
             "dest": "startPage",
             "conditions": "is_going_to_startPage",
         },
+        # --------------enter movie or comic------------------
         {
             "trigger": "advance",
             "source": "startPage",
@@ -40,9 +42,136 @@ machine = TocMachine(
             "dest": "horror",
             "conditions": "is_going_to_horror",
         },
+        {
+            "trigger": "advance",
+            "source": "startPage",
+            "dest": "terror",
+            "conditions": "is_going_to_terror",
+        },
+        {
+            "trigger": "advance",
+            "source": "startPage",
+            "dest": "school",
+            "conditions": "is_going_to_school",
+        },
+        {
+            "trigger": "advance",
+            "source": "startPage",
+            "dest": "fighting",
+            "conditions": "is_going_to_fighting",
+        },
 
-        {"trigger": "go_back", "source": [
-            "startPage", "romance", "comedy", "horror"], "dest": "startPage"},
+
+        # --------------------choose type--------------------
+        {
+            "trigger": "advance",
+            "source": "romance",
+            "dest": "movieDetail",
+            "conditions": "is_going_to_movieDetail",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "comedy",
+            "dest": "movieDetail",
+            "conditions": "is_going_to_movieDetail",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "horror",
+            "dest": "movieDetail",
+            "conditions": "is_going_to_movieDetail",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "terror",
+            "dest": "comicDetail",
+            "conditions": "is_going_to_comicDetail",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "school",
+            "dest": "comicDetail",
+            "conditions": "is_going_to_comicDetail",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "fighting",
+            "dest": "comicDetail",
+            "conditions": "is_going_to_comicDetail",
+
+        },
+
+
+
+
+        # ------------------------load more--------------------------
+        {
+            "trigger": "advance",
+            "source": "movieDetail",
+            "dest": "romance",
+            "conditions": "is_going_to_romance",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "movieDetail",
+            "dest": "comedy",
+            "conditions": "is_going_to_comedy",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "movieDetail",
+            "dest": "horror",
+            "conditions": "is_going_to_horror",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "comicDetail",
+            "dest": "terror",
+            "conditions": "is_going_to_terror",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "comicDetail",
+            "dest": "school",
+            "conditions": "is_going_to_school",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "comicDetail",
+            "dest": "fighting",
+            "conditions": "is_going_to_fighting",
+
+        },
+
+
+        # ---------------go to finite state-------------------------------
+        {
+            "trigger": "advance",
+            "source": "movieDetail",
+            "dest": "final",
+            "conditions": "is_going_to_final",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "comicDetail",
+            "dest": "final",
+            "conditions": "is_going_to_final",
+
+        },
+
+        {"trigger": "go_back", "source": ["final"], "dest": "startPage"},
+
     ],
     initial="user",
     auto_transitions=False,
@@ -108,16 +237,14 @@ def webhook_handler():
 
     # if event is MessageEvent and message is TextMessage, then echo text
     for event in events:
-        if not isinstance(event, MessageEvent):
-            continue
-        if not isinstance(event.message, TextMessage):
-            continue
-        if not isinstance(event.message.text, str):
-            continue
-        #print(f"\nFSM STATE: {machine.state}")
+        print(f"\nFSM STATE: {machine.state}")
         #print(f"REQUEST BODY: \n{body}")
-        response = machine.advance(event)
-        print(f"respose\n {response}")
+        if(event.type == "message"):
+            if(event.message.text.lower() != "detail"):  # avoid to finite state
+                response = machine.advance(event)
+        else:
+            response = machine.advance(event)
+            print(response)
 
     return "OK"
 
