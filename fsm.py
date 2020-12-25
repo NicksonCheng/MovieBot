@@ -1,12 +1,15 @@
 from transitions.extensions import GraphMachine
 
-from utils import send_text_message, send_button_carousel, send_button_message, crawlMovie, crawlComic
+from utils import send_text_message, send_button_carousel, send_button_message, send_video_message, crawlMovie, crawlTV, crawlComic
 
 
 class TocMachine(GraphMachine):
 
     def __init__(self, **machine_configs):
+
         self.machine = GraphMachine(model=self, **machine_configs)
+        self.current_counter = 3
+        self.current_coming = 3
         self.horror_counter = 3
         self.romance_counter = 3
         self.comedy_counter = 3
@@ -16,6 +19,19 @@ class TocMachine(GraphMachine):
 
     def is_going_to_startPage(self, event):
         return True
+
+    def is_going_to_current(self, event):
+
+        text = event.message.text
+        return text.lower() == "current" or text.lower() == "load more current"
+
+    def is_going_to_comedy(self, event):
+        text = event.message.text
+        return text.lower() == "coming" or text.lower() == "load more coming"
+
+    def is_going_to_horror(self, event):
+        text = event.message.text
+        return text.lower() == "famous" or text.lower() == "load more famous"
 
     def is_going_to_romance(self, event):
         text = event.message.text
@@ -41,7 +57,14 @@ class TocMachine(GraphMachine):
         text = event.message.text
         return text.lower() == "fighting" or text.lower() == "load more fighting"
 
-    def is_going_to_movieDetail(self, event):
+    def is_going_to_MovieDetail(self, event):
+
+        infor = event.postback.data
+
+        text = infor.split(',')[0]
+        return text.lower() == "detail"
+
+    def is_going_to_TVDetail(self, event):
         infor = event.postback.data
         text = infor.split(',')[0]
         return text.lower() == "detail"
@@ -51,6 +74,10 @@ class TocMachine(GraphMachine):
         text = infor.split('@')[0]
         return text.lower() == "detail"
 
+    def is_going_to_trailer(self, event):
+        text = event.message.text
+        return text.lower() == "trailer"
+
     def is_going_to_final(self, event):
         return True
 
@@ -58,28 +85,36 @@ class TocMachine(GraphMachine):
         userId = event.source.user_id
         send_button_carousel(userId)
 
+    def on_enter_current(self, event):
+        userId = event.source.user_id
+        reply_token = event.reply_token
+        url = 'https://www.vscinemas.com.tw/vsweb/film/index.aspx'
+        crawlMovie(userId, reply_token, url, self.current_counter,
+                   "更多新片", "load more current")
+        self.current_counter += 3
+
     def on_enter_romance(self, event):
         userId = event.source.user_id
         reply_token = event.reply_token
-        url = 'https://www.movieffm.net/movies/?genres=romance&region&dtyear&cats&orderby=view'
-        crawlMovie(userId, reply_token, url, self.romance_counter,
-                   "更多愛情片", "load more romance")
+        url = 'https://www.movieffm.net/tvshows/?genres=romance&region&dtyear&cats&orderby'
+        crawlTV(userId, reply_token, url, self.romance_counter,
+                "更多愛情片", "load more romance")
         self.romance_counter += 3
 
     def on_enter_comedy(self, event):
         userId = event.source.user_id
         reply_token = event.reply_token
-        url = 'https://www.movieffm.net/movies/?genres=comedy&region&dtyear&cats&orderby=view'
-        crawlMovie(userId, reply_token, url, self.comedy_counter,
-                   "更多喜劇片", "load more comedy")
+        url = 'https://www.movieffm.net/tvshows/?genres=comedy&region&dtyear&cats&orderby'
+        crawlTV(userId, reply_token, url, self.comedy_counter,
+                "更多喜劇片", "load more comedy")
         self.comedy_counter += 3
 
     def on_enter_horror(self, event):
         userId = event.source.user_id
         reply_token = event.reply_token
-        url = 'https://www.movieffm.net/movies/?genres=horror&region&dtyear&cats&orderby=view'
-        crawlMovie(userId, reply_token, url, self.horror_counter,
-                   "更多恐怖片", "load more horror")
+        url = 'https://www.movieffm.net/tvshows/?genres=horror&region&dtyear&cats&orderby'
+        crawlTV(userId, reply_token, url, self.horror_counter,
+                "更多恐怖片", "load more horror")
         self.horror_counter += 3
 
     def on_enter_terror(self, event):
@@ -106,14 +141,24 @@ class TocMachine(GraphMachine):
                    self.fight_counter, "更多格鬥漫畫", "load more fighting")
         self.fight_counter += 3
 
-    def on_enter_movieDetail(self, event):
+    def on_enter_MovieDetail(self, event):
         text = event.postback.data
         infor = event.postback.data.split(',')
         infor.pop(0)
         reply_token = event.reply_token
         userId = event.source.user_id
-        send_text_message(reply_token, infor, "movie")
-        send_button_message(userId, "movie")
+        send_text_message(reply_token, infor, "Movie")
+
+        send_button_message(userId, "Movie")
+
+    def on_enter_TVDetail(self, event):
+        text = event.postback.data
+        infor = event.postback.data.split(',')
+        infor.pop(0)
+        reply_token = event.reply_token
+        userId = event.source.user_id
+        send_text_message(reply_token, infor, "TV")
+        send_button_message(userId, "TV")
 
     def on_enter_comicDetail(self, event):
         text = event.postback.data
@@ -125,7 +170,14 @@ class TocMachine(GraphMachine):
         send_text_message(reply_token, infor, "comic")
         send_button_message(userId, "comic")
 
+    def on_enter_trailer(self, event):
+        reply_token = event.reply_token
+        send_video_message(reply_token)
+        print("enter trailer!")
+
     def on_enter_final(self, event):
+        self.current_counter = 3
+        self.current_coming = 3
         self.horror_counter = 3
         self.romance_counter = 3
         self.comedy_counter = 3

@@ -14,8 +14,8 @@ load_dotenv()
 
 
 machine = TocMachine(
-    states=["user", "startPage", "romance",
-            "comedy", "horror", "terror", "school", "fighting", "movieDetail", "comicDetail", "final"],
+    states=["user", "startPage", "current", "coming", "famous", "romance",
+            "comedy", "horror", "terror", "school", "fighting", "MovieDetail", "TVDetail", "comicDetail", "trailer", "final"],
     transitions=[
         {
             "trigger": "advance",
@@ -23,7 +23,26 @@ machine = TocMachine(
             "dest": "startPage",
             "conditions": "is_going_to_startPage",
         },
-        # --------------enter movie or comic------------------
+        # --------------enter movie,TV or comic------------------
+        {
+            "trigger": "advance",
+            "source": "startPage",
+            "dest": "current",
+            "conditions": "is_going_to_current",
+        },
+        {
+            "trigger": "advance",
+            "source": "startPage",
+            "dest": "coming",
+            "conditions": "is_going_to_coming",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "startPage",
+            "dest": "romance",
+            "conditions": "is_going_to_famous",
+        },
         {
             "trigger": "advance",
             "source": "startPage",
@@ -65,23 +84,30 @@ machine = TocMachine(
         # --------------------choose type--------------------
         {
             "trigger": "advance",
+            "source": "current",
+            "dest": "MovieDetail",
+            "conditions": "is_going_to_MovieDetail",
+
+        },
+        {
+            "trigger": "advance",
             "source": "romance",
-            "dest": "movieDetail",
-            "conditions": "is_going_to_movieDetail",
+            "dest": "TVDetail",
+            "conditions": "is_going_to_TVDetail",
 
         },
         {
             "trigger": "advance",
             "source": "comedy",
-            "dest": "movieDetail",
-            "conditions": "is_going_to_movieDetail",
+            "dest": "TVDetail",
+            "conditions": "is_going_to_TVDetail",
 
         },
         {
             "trigger": "advance",
             "source": "horror",
-            "dest": "movieDetail",
-            "conditions": "is_going_to_movieDetail",
+            "dest": "TVDetail",
+            "conditions": "is_going_to_TVDetail",
 
         },
         {
@@ -112,21 +138,28 @@ machine = TocMachine(
         # ------------------------load more--------------------------
         {
             "trigger": "advance",
-            "source": "movieDetail",
+            "source": "MovieDetail",
+            "dest": "current",
+            "conditions": "is_going_to_current",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "TVDetail",
             "dest": "romance",
             "conditions": "is_going_to_romance",
 
         },
         {
             "trigger": "advance",
-            "source": "movieDetail",
+            "source": "TVDetail",
             "dest": "comedy",
             "conditions": "is_going_to_comedy",
 
         },
         {
             "trigger": "advance",
-            "source": "movieDetail",
+            "source": "TVDetail",
             "dest": "horror",
             "conditions": "is_going_to_horror",
 
@@ -152,12 +185,26 @@ machine = TocMachine(
             "conditions": "is_going_to_fighting",
 
         },
+        # ----------------------trailer------------------------------------
+        {
+            "trigger": "advance",
+            "source": "MovieDetail",
+            "dest": "trailer",
+            "conditions": "is_going_to_trailer",
 
+        },
 
         # ---------------go to finite state-------------------------------
         {
             "trigger": "advance",
-            "source": "movieDetail",
+            "source": "MovieDetail",
+            "dest": "final",
+            "conditions": "is_going_to_final",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "TVDetail",
             "dest": "final",
             "conditions": "is_going_to_final",
 
@@ -167,6 +214,13 @@ machine = TocMachine(
             "source": "comicDetail",
             "dest": "final",
             "conditions": "is_going_to_final",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "trailer",
+            "dest": "final",
+            "conditions": "is_going_to_trailer",
 
         },
 

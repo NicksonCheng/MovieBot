@@ -3,7 +3,7 @@ import sys
 import requests
 from bs4 import BeautifulSoup
 from linebot import LineBotApi, WebhookParser
-from linebot.models import MessageEvent, PostbackEvent, TextMessage, TextSendMessage, PostbackAction, CarouselTemplate, ButtonsTemplate, TemplateSendMessage, TemplateAction, CarouselColumn, ButtonComponent, MessageTemplateAction, ImageCarouselColumn, PostbackTemplateAction, ImageCarouselTemplate
+from linebot.models import MessageEvent, PostbackEvent, TextMessage, VideoMessage, TextSendMessage, VideoSendMessage, PostbackAction, CarouselTemplate, ButtonsTemplate, TemplateSendMessage, TemplateAction, CarouselColumn, ButtonComponent, MessageTemplateAction, ImageCarouselColumn, PostbackTemplateAction, ImageCarouselTemplate
 
 
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
@@ -12,6 +12,15 @@ watch_more_text = ""
 
 
 class MovieInfor:
+    def __init__(self, name, image, date, outline, link):
+        self.name = name
+        self.image = image
+        self.outline = outline
+        self.date = date
+        self.link = link
+
+
+class TVInfor:
     def __init__(self, name, image, outline, star, link):
         self.name = name
         self.image = image
@@ -33,8 +42,11 @@ class ComicInfor:
 def send_text_message(reply_token, text, watch_type):
     string = ""
     if(type(text) == list):
-        if(watch_type == "movie"):
-            string = "電影:"+text[0]+"\n"+"介紹:"+text[1] + \
+        if(watch_type == "Movie"):
+            string = "電影:"+text[0]+"\n"+text[1] + \
+                "\n"+text[2] + '\n' + "連結:"+text[3]+"\n"
+        elif(watch_type == "TV"):
+            string = "電視劇::"+text[0]+"\n"+"介紹:"+text[1] + \
                 "\n"+"評分:"+text[2]+"\n"+"連結:"+text[3]+"\n"
         elif(watch_type == "comic"):
             string = "漫畫:"+text[0]+"\n"+"介紹:"+text[1] + \
@@ -48,20 +60,41 @@ def send_text_message(reply_token, text, watch_type):
     return "OK"
 
 
+def send_video_message(reply_token):
+
+    line_bot_api = LineBotApi(channel_access_token)
+    message = VideoSendMessage(
+        original_content_url="https://www.youtube.com/embed/-RAdHJ-aquE",
+        preview_image_url="https://www.vscinemas.com.tw/vsweb/upload/film/film_20201106001.jpg",
+
+    )
+    line_bot_api.reply_message(reply_token, message)
+
+
 def send_button_message(userId, watch_type):
     global watch_more_type
     global watch_more_text
     view_text = ""
     view_img = ""
-    if(watch_type == "movie"):
-        view_text = "get more movie?"
+    act = []
+    if(watch_type == "TV"):
+        view_text = "get more TV?"
+        view_img = "https://travel.ulifestyle.com.hk/cms/news_photo/1024x576/20200421184008__31112860324_47f1e039ef_b.jpg"
+        acts = [MessageTemplateAction(label="回到主頁面", text="back"), MessageTemplateAction(
+            label=watch_more_type, text=watch_more_text)]
+    elif(watch_type == "Movie"):
+        view_text = "get more Movie?"
         view_img = "https://scontent-tpe1-1.xx.fbcdn.net/v/t1.0-9/18528023_10154290831916403_4058721277470459196_n.jpg?_nc_cat=110&ccb=2&_nc_sid=09cbfe&_nc_ohc=eILRNJk5cnwAX-hDsiM&_nc_ht=scontent-tpe1-1.xx&oh=049993d54a93ba1e5a470858cef73b33&oe=600831CF"
+        acts = [MessageTemplateAction(label="回到主頁面", text="back"), MessageTemplateAction(
+            label=watch_more_type, text=watch_more_text), MessageTemplateAction(
+            label="收看預告", text="trailer")]
     else:
         view_text = "get more comic?"
         view_img = "https://p2.bahamut.com.tw/B/2KU/52/05bb4c851970ab2e9942f32c0118ff85.JPG?w=1000"
+        acts = [MessageTemplateAction(label="回到主頁面", text="back"), MessageTemplateAction(
+            label=watch_more_type, text=watch_more_text)]
+
     line_bot_api = LineBotApi(channel_access_token)
-    acts = [MessageTemplateAction(label="回到主頁面", text="back"), MessageTemplateAction(
-        label=watch_more_type, text=watch_more_text)]
 
     message = TemplateSendMessage(
         alt_text='Buttons template',
@@ -85,7 +118,28 @@ def send_button_carousel(userId):
                 CarouselColumn(
                     thumbnail_image_url='https://scontent-tpe1-1.xx.fbcdn.net/v/t1.0-9/18528023_10154290831916403_4058721277470459196_n.jpg?_nc_cat=110&ccb=2&_nc_sid=09cbfe&_nc_ohc=eILRNJk5cnwAX-hDsiM&_nc_ht=scontent-tpe1-1.xx&oh=049993d54a93ba1e5a470858cef73b33&oe=600831CF',
                     title='Movie Menu',
-                    text='Which movie would you like to watch?',
+                    text='choose Movie you want',
+                    actions=[
+                         MessageTemplateAction(
+                             label='current',
+                             text='current'
+
+                         ),
+                        MessageTemplateAction(
+                             label='coming',
+                             text='coming'
+
+                         ),
+                        MessageTemplateAction(
+                             label='famout',
+                             text='famous'
+                         )
+                    ]
+                ),
+                CarouselColumn(
+                    thumbnail_image_url='https://travel.ulifestyle.com.hk/cms/news_photo/1024x576/20200421184008__31112860324_47f1e039ef_b.jpg',
+                    title='TV Menu',
+                    text='Which TV would you like to watch?',
                     actions=[
                          MessageTemplateAction(
                              label='romance',
@@ -133,12 +187,16 @@ def send_button_carousel(userId):
 
 
 def send_image_carousel(all_infor, id, watch_type):
+    print("successful")
 
     line_bot_api = LineBotApi(channel_access_token)
     cols = []
     for infor in all_infor:
         data = ""
-        if(watch_type == "movie"):
+        if(watch_type == "Movie"):
+            data = "detail,"+infor.name+","+infor.date+","+infor.outline+","+infor.link
+            print(data)
+        elif(watch_type == "TV"):
             data = "detail,"+infor.name+","+infor.outline+","+infor.star+","+infor.link
         else:
             data = "detail@ "+infor.name+"@" + infor.outline+"@" + infor.popularity + \
@@ -149,7 +207,7 @@ def send_image_carousel(all_infor, id, watch_type):
             ImageCarouselColumn(
                 image_url=infor.image,
                 action=PostbackTemplateAction(
-                    label=infor.name,
+                    label=infor.name[:10],
                     data=data,
                     text="detail"
                 )
@@ -164,32 +222,64 @@ def send_image_carousel(all_infor, id, watch_type):
     return "OK"
 
 
-def crawlMovie(userId, reply_token, movie_url, counter, m_type, m_text):
+def crawlMovie(userId, reply_token, m_url, counter, m_type, m_text):
+
+    send_text_message(reply_token, "系統處理中,請稍後~~", "general")
+    global watch_more_type
+    global watch_more_text
+    watch_more_type = m_type
+    watch_more_text = m_text
+    basic_url = "https://www.vscinemas.com.tw/vsweb/"
+    url = m_url
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    movies = soup.find("ul", class_="movieList").find_all("li", limit=counter)
+    all_infor = []
+    for i in range(counter-3, counter, 1):
+        inn_url = url.replace("index.aspx", "") + \
+            movies[i].find("figure").find("a").get('href')
+        response = requests.get(inn_url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        movie = soup.find("div", class_="movieMain")
+        image = movie.find("img").get('src')[2:]
+        image = basic_url+image
+        name = movie.find("div", class_="titleArea").find("h1").text
+
+        date = movie.find("div", class_="titleArea").find("time").text
+        td = movie.find("div", class_="infoArea").find_all("td")
+        outline = td[0].text+td[1].find("p").text+'\n'+td[2].text+td[3].find(
+            "p").text+'\n'+td[4].text+td[5].text+"\n"+td[6].text+td[7].text+"\n"
+        all_infor.append(MovieInfor(name, image, date, outline, inn_url))
+    # print(all_infor)
+    send_image_carousel(all_infor, userId, "Movie")
+
+
+def crawlTV(userId, reply_token, TV_url, counter, m_type, m_text):
     send_text_message(reply_token, "系統處理中,請稍後~", "general")
     global watch_more_type
     global watch_more_text
     watch_more_type = m_type
     watch_more_text = m_text
 
-    url = movie_url
+    url = TV_url
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
-    movies = soup.find(id='archive-content').find_all("article", limit=counter)
+    TVs = soup.find(id='archive-content').find_all("article", limit=counter)
     all_infor = []
     for i in range(counter-3, counter, 1):
-        image = movies[i].find("img").get('src')
-        name = movies[i].find("div", "title").text
+        image = TVs[i].find("img").get('src')
+        name = TVs[i].find("div", "title").text
         if(name.find('：') != -1):
             name = name.split('：')[0]
         elif(name.find('/') != -1):
             name = name.split('/')[0]
-        outline = movies[i].find("div", "texto").text
-        star = movies[i].find("div", "rating").text
-        link = movies[i].find("a").get('href')
+        outline = TVs[i].find("div", "texto").text
+        star = TVs[i].find("div", "rating").text
+        link = TVs[i].find("a").get('href')
         # print(f"type={star}\nimage={type(star)}")
-        all_infor.append(MovieInfor(name, image, outline, star, link))
+        all_infor.append(TVInfor(name, image, outline, star, link))
 
-    send_image_carousel(all_infor, userId, "movie")
+    send_image_carousel(all_infor, userId, "TV")
 
 
 def crawlComic(userId, reply_token, comic_url, counter, c_type, c_text):
