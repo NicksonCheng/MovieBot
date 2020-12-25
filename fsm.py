@@ -3,19 +3,41 @@ from transitions.extensions import GraphMachine
 from utils import send_text_message, send_button_carousel, send_button_message, send_video_message, crawlMovie, crawlTV, crawlComic
 
 
+class Movie:
+
+    def setUrl(self, url):
+        self.url = url
+
+    def setIdx(self, idx):
+        self.idx = idx
+
+    def setEvent(self, event):
+        self.event = event
+
+    def getUrl(self):
+        return self.url
+
+    def getIdx(self):
+        return self.idx
+
+    def getEvent(self):
+        return self.event
+
+
 class TocMachine(GraphMachine):
 
     def __init__(self, **machine_configs):
 
         self.machine = GraphMachine(model=self, **machine_configs)
-        self.current_counter = 3
-        self.current_coming = 3
+        self.current_counter = 0
+        self.current_coming = 0
         self.horror_counter = 3
         self.romance_counter = 3
         self.comedy_counter = 3
         self.fight_counter = 3
         self.school_counter = 3
         self.terror_counter = 3
+        self.movie = Movie()
 
     def is_going_to_startPage(self, event):
         return True
@@ -58,7 +80,6 @@ class TocMachine(GraphMachine):
         return text.lower() == "fighting" or text.lower() == "load more fighting"
 
     def is_going_to_MovieDetail(self, event):
-
         infor = event.postback.data
 
         text = infor.split(',')[0]
@@ -86,12 +107,13 @@ class TocMachine(GraphMachine):
         send_button_carousel(userId)
 
     def on_enter_current(self, event):
+        self.current_counter += 3
         userId = event.source.user_id
         reply_token = event.reply_token
-        url = 'https://www.vscinemas.com.tw/vsweb/film/index.aspx'
+        url = "https://www.vscinemas.com.tw/vsweb/film/index.aspx"
+        # self.movie.setUrl(url)
         crawlMovie(userId, reply_token, url, self.current_counter,
                    "更多新片", "load more current")
-        self.current_counter += 3
 
     def on_enter_romance(self, event):
         userId = event.source.user_id
@@ -142,12 +164,16 @@ class TocMachine(GraphMachine):
         self.fight_counter += 3
 
     def on_enter_MovieDetail(self, event):
+        print(event.reply_token)
         text = event.postback.data
         infor = event.postback.data.split(',')
         infor.pop(0)
         reply_token = event.reply_token
         userId = event.source.user_id
-        send_text_message(reply_token, infor, "Movie")
+        self.movie.setIdx(infor[4])
+        self.movie.setEvent(event)
+
+        #send_text_message(reply_token, infor, "Movie")
 
         send_button_message(userId, "Movie")
 
@@ -173,11 +199,11 @@ class TocMachine(GraphMachine):
     def on_enter_trailer(self, event):
         reply_token = event.reply_token
         send_video_message(reply_token)
-        print("enter trailer!")
+        self.go_back_detail(self.movie.getEvent())
 
     def on_enter_final(self, event):
-        self.current_counter = 3
-        self.current_coming = 3
+        self.current_counter = 0
+        self.current_coming = 0
         self.horror_counter = 3
         self.romance_counter = 3
         self.comedy_counter = 3

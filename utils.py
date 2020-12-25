@@ -12,12 +12,13 @@ watch_more_text = ""
 
 
 class MovieInfor:
-    def __init__(self, name, image, date, outline, link):
+    def __init__(self, name, image, date, outline, link, index):
         self.name = name
         self.image = image
         self.outline = outline
         self.date = date
         self.link = link
+        self.idx = index
 
 
 class TVInfor:
@@ -187,14 +188,15 @@ def send_button_carousel(userId):
 
 
 def send_image_carousel(all_infor, id, watch_type):
-    print("successful")
 
     line_bot_api = LineBotApi(channel_access_token)
     cols = []
     for infor in all_infor:
         data = ""
+
         if(watch_type == "Movie"):
-            data = "detail,"+infor.name+","+infor.date+","+infor.outline+","+infor.link
+            data = "detail,"+infor.name+","+infor.date+"," + \
+                infor.outline+","+infor.link+","+str(infor.idx)
             print(data)
         elif(watch_type == "TV"):
             data = "detail,"+infor.name+","+infor.outline+","+infor.star+","+infor.link
@@ -249,8 +251,10 @@ def crawlMovie(userId, reply_token, m_url, counter, m_type, m_text):
         td = movie.find("div", class_="infoArea").find_all("td")
         outline = td[0].text+td[1].find("p").text+'\n'+td[2].text+td[3].find(
             "p").text+'\n'+td[4].text+td[5].text+"\n"+td[6].text+td[7].text+"\n"
-        all_infor.append(MovieInfor(name, image, date, outline, inn_url))
-    # print(all_infor)
+        index = i
+        all_infor.append(MovieInfor(
+            name, image, date, outline, inn_url, index))
+    print(all_infor)
     send_image_carousel(all_infor, userId, "Movie")
 
 

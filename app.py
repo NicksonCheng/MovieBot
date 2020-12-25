@@ -225,6 +225,8 @@ machine = TocMachine(
         },
 
         {"trigger": "go_back", "source": ["final"], "dest": "startPage"},
+        {"trigger": "go_back_detail", "source": [
+            "trailer"], "dest": "MovieDetail"},
 
     ],
     initial="user",
