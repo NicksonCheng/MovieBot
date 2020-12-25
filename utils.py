@@ -1,24 +1,27 @@
 import os
 import sys
+import shutil
 import requests
 from bs4 import BeautifulSoup
 from linebot import LineBotApi, WebhookParser
 from linebot.models import MessageEvent, PostbackEvent, TextMessage, VideoMessage, TextSendMessage, VideoSendMessage, PostbackAction, CarouselTemplate, ButtonsTemplate, TemplateSendMessage, TemplateAction, CarouselColumn, ButtonComponent, MessageTemplateAction, ImageCarouselColumn, PostbackTemplateAction, ImageCarouselTemplate
-
+from pytube import YouTube
 
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
 watch_more_type = ""
 watch_more_text = ""
+all_movie_infor = []
 
 
 class MovieInfor:
-    def __init__(self, name, image, date, outline, link, index):
+    def __init__(self, name, image, date, outline, link, video, index):
         self.name = name
         self.image = image
         self.outline = outline
         self.date = date
         self.link = link
         self.idx = index
+        self.video = video
 
 
 class TVInfor:
@@ -61,14 +64,18 @@ def send_text_message(reply_token, text, watch_type):
     return "OK"
 
 
-def send_video_message(reply_token):
+def send_video_message(reply_token, movie_idx):
+    print(movie_idx)
+    global all_movie_infor
 
     line_bot_api = LineBotApi(channel_access_token)
     message = VideoSendMessage(
-        original_content_url="https://www.youtube.com/embed/-RAdHJ-aquE",
-        preview_image_url="https://www.vscinemas.com.tw/vsweb/upload/film/film_20201106001.jpg",
+        original_content_url=all_movie_infor[int(movie_idx)].video,
+        preview_image_url=all_movie_infor[int(movie_idx)].image,
 
     )
+    # shutil.rmtree("download")
+
     line_bot_api.reply_message(reply_token, message)
 
 
@@ -84,11 +91,14 @@ def send_button_message(userId, watch_type):
         acts = [MessageTemplateAction(label="回到主頁面", text="back"), MessageTemplateAction(
             label=watch_more_type, text=watch_more_text)]
     elif(watch_type == "Movie"):
+
         view_text = "get more Movie?"
         view_img = "https://scontent-tpe1-1.xx.fbcdn.net/v/t1.0-9/18528023_10154290831916403_4058721277470459196_n.jpg?_nc_cat=110&ccb=2&_nc_sid=09cbfe&_nc_ohc=eILRNJk5cnwAX-hDsiM&_nc_ht=scontent-tpe1-1.xx&oh=049993d54a93ba1e5a470858cef73b33&oe=600831CF"
         acts = [MessageTemplateAction(label="回到主頁面", text="back"), MessageTemplateAction(
             label=watch_more_type, text=watch_more_text), MessageTemplateAction(
             label="收看預告", text="trailer")]
+        if(watch_more_type == "no more"):
+            del acts[1]
     else:
         view_text = "get more comic?"
         view_img = "https://p2.bahamut.com.tw/B/2KU/52/05bb4c851970ab2e9942f32c0118ff85.JPG?w=1000"
@@ -118,63 +128,63 @@ def send_button_carousel(userId):
             columns=[
                 CarouselColumn(
                     thumbnail_image_url='https://scontent-tpe1-1.xx.fbcdn.net/v/t1.0-9/18528023_10154290831916403_4058721277470459196_n.jpg?_nc_cat=110&ccb=2&_nc_sid=09cbfe&_nc_ohc=eILRNJk5cnwAX-hDsiM&_nc_ht=scontent-tpe1-1.xx&oh=049993d54a93ba1e5a470858cef73b33&oe=600831CF',
-                    title='Movie Menu',
-                    text='choose Movie you want',
+                    title='電影系列',
+                    text='選擇你想要了解的電影',
                     actions=[
                          MessageTemplateAction(
-                             label='current',
+                             label='熱售中',
                              text='current'
 
                          ),
                         MessageTemplateAction(
-                             label='coming',
+                             label='即將上映',
                              text='coming'
 
                          ),
                         MessageTemplateAction(
-                             label='famout',
+                             label='哈燒榜',
                              text='famous'
                          )
                     ]
                 ),
                 CarouselColumn(
                     thumbnail_image_url='https://travel.ulifestyle.com.hk/cms/news_photo/1024x576/20200421184008__31112860324_47f1e039ef_b.jpg',
-                    title='TV Menu',
-                    text='Which TV would you like to watch?',
+                    title='電視劇系列',
+                    text='選擇你想要追的電視劇?',
                     actions=[
                          MessageTemplateAction(
-                             label='romance',
+                             label='浪漫系列',
                              text='romance'
 
                          ),
                         MessageTemplateAction(
-                             label='comedy',
+                             label='喜劇系列',
                              text='comedy'
 
                          ),
                         MessageTemplateAction(
-                             label='horror',
+                             label='恐怖系列',
                              text='horror'
                          )
                     ]
                 ),
                 CarouselColumn(
                     thumbnail_image_url='https://p2.bahamut.com.tw/B/2KU/52/05bb4c851970ab2e9942f32c0118ff85.JPG?w=1000',
-                    title='Comic Menu',
-                    text='Which comic would you like to watch?',
+                    title='動漫系列',
+                    text='選擇你想看的漫畫?',
                     actions=[
                          MessageTemplateAction(
-                             label='terror',
+                             label='恐怖類型',
                              text='terror'
 
                          ),
                         MessageTemplateAction(
-                             label='school',
+                             label='校園類型',
                              text='school'
 
                          ),
                         MessageTemplateAction(
-                             label='fighting',
+                             label='格鬥類型',
                              text='fighting'
                          )
                     ]
@@ -235,11 +245,27 @@ def crawlMovie(userId, reply_token, m_url, counter, m_type, m_text):
     url = m_url
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
-    movies = soup.find("ul", class_="movieList").find_all("li", limit=counter)
-    all_infor = []
+    movies = ""
+    page_from = ""
+    if(m_text == "load more famous"):
+        page_from = "hot.aspx"
+        movies = soup.find("ul", class_="hotList").find_all(
+            "li", limit=counter)
+    elif(m_text == "load more current"):
+        page_from = "index.aspx"
+        movies = soup.find("ul", class_="movieList").find_all(
+            "li", limit=counter)
+    else:
+        page_from = "coming.aspx"
+        movies = soup.find("ul", class_="movieList").find_all(
+            "li", limit=counter)
+    global all_movie_infor
+    all_movie_infor = []
     for i in range(counter-3, counter, 1):
-        inn_url = url.replace("index.aspx", "") + \
+        print(page_from)
+        inn_url = url.replace(page_from, "") + \
             movies[i].find("figure").find("a").get('href')
+        print(inn_url)
         response = requests.get(inn_url)
         soup = BeautifulSoup(response.text, "html.parser")
         movie = soup.find("div", class_="movieMain")
@@ -251,11 +277,23 @@ def crawlMovie(userId, reply_token, m_url, counter, m_type, m_text):
         td = movie.find("div", class_="infoArea").find_all("td")
         outline = td[0].text+td[1].find("p").text+'\n'+td[2].text+td[3].find(
             "p").text+'\n'+td[4].text+td[5].text+"\n"+td[6].text+td[7].text+"\n"
-        index = i
-        all_infor.append(MovieInfor(
-            name, image, date, outline, inn_url, index))
-    print(all_infor)
-    send_image_carousel(all_infor, userId, "Movie")
+        index = i-(counter-3)
+        video = ""
+        try:
+            video = soup.find("iframe").get('src')
+        except:
+            video = "https://www.youtube.com/embed/-RAdHJ-aquE"
+
+        print(image)
+        print(name)
+        print(date)
+        print(outline)
+        print(video)
+        all_movie_infor.append(MovieInfor(
+            name, image, date, outline, inn_url, video, index))
+
+    print(all_movie_infor)
+    send_image_carousel(all_movie_infor, userId, "Movie")
 
 
 def crawlTV(userId, reply_token, TV_url, counter, m_type, m_text):

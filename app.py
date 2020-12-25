@@ -35,6 +35,18 @@ machine = TocMachine(
             "source": "startPage",
             "dest": "coming",
             "conditions": "is_going_to_coming",
+        },
+        {
+            "trigger": "advance",
+            "source": "startPage",
+            "dest": "famous",
+            "conditions": "is_going_to_famous",
+        },
+        {
+            "trigger": "advance",
+            "source": "startPage",
+            "dest": "coming",
+            "conditions": "is_going_to_coming",
 
         },
         {
@@ -91,6 +103,20 @@ machine = TocMachine(
         },
         {
             "trigger": "advance",
+            "source": "coming",
+            "dest": "MovieDetail",
+            "conditions": "is_going_to_MovieDetail",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "famous",
+            "dest": "MovieDetail",
+            "conditions": "is_going_to_MovieDetail",
+
+        },
+        {
+            "trigger": "advance",
             "source": "romance",
             "dest": "TVDetail",
             "conditions": "is_going_to_TVDetail",
@@ -141,6 +167,20 @@ machine = TocMachine(
             "source": "MovieDetail",
             "dest": "current",
             "conditions": "is_going_to_current",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "MovieDetail",
+            "dest": "coming",
+            "conditions": "is_going_to_coming",
+
+        },
+        {
+            "trigger": "advance",
+            "source": "MovieDetail",
+            "dest": "famous",
+            "conditions": "is_going_to_famous",
 
         },
         {
