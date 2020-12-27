@@ -24,10 +24,10 @@ system will load three Movie/TV/Comic,choose you want!
 and when you tap the image,system will show the detail for Movie/TV/Comic
 
 <p align=center>
-    <img src="feature/mvoie.jpg">
+    <img style="width:30px; height:30px;" src="feature/movie.jpg">
     <img src="feature/tv.jpg">
-</p>
 
+</p>
 ## detail for Movie/TV/Comic
 
 <p align=center>
