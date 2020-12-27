@@ -54,3 +54,11 @@ so you can see movie trailer in line directly!
 </p>
 
 ## Back to Main Page
+
+back to main page
+
+# fsm image
+
+<p align=center>
+    <img src="feature/fsm.png">
+</p>
