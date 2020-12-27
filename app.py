@@ -281,10 +281,10 @@ app = Flask(__name__, static_url_path="")
 channel_secret = os.getenv("LINE_CHANNEL_SECRET", None)
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
 if channel_secret is None:
-    print("Specify LINE_CHANNEL_SECRET as environment variable.")
+    # print("Specify LINE_CHANNEL_SECRET as environment variable.")
     sys.exit(1)
 if channel_access_token is None:
-    print("Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.")
+    # print("Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.")
     sys.exit(1)
 
 line_bot_api = LineBotApi(channel_access_token)
@@ -333,14 +333,14 @@ def webhook_handler():
 
     # if event is MessageEvent and message is TextMessage, then echo text
     for event in events:
-        print(f"\nFSM STATE: {machine.state}")
+        # print(f"\nFSM STATE: {machine.state}")
         #print(f"REQUEST BODY: \n{body}")
         if(event.type == "message"):
             if(event.message.text.lower() != "detail"):  # avoid to finite state
                 response = machine.advance(event)
         else:
             response = machine.advance(event)
-            print(response)
+            # print(response)
 
     return "OK"
 

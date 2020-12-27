@@ -76,13 +76,13 @@ def downloadYoutube(url):
     yt.download("static")
     videos = os.listdir("static")
     old_path = "static/"+videos[0]
-    print(old_path)
+    # print(old_path)
     new_path = "static/video"+str(len(all_video_url))+".mp4"
 
     try:
         os.rename(old_path, new_path)
     except Exception as e:
-        print("error")
+        # print("error")
 
 
 def send_video_message(reply_token, movie_idx):
@@ -231,13 +231,13 @@ def send_image_carousel(all_infor, id, watch_type):
         if(watch_type == "Movie"):
             data = "detail,"+infor.name+","+infor.date+"," + \
                 infor.outline+","+infor.link+","+str(infor.idx)
-            print(data)
+            # print(data)
         elif(watch_type == "TV"):
             data = "detail,"+infor.name+","+infor.outline+","+infor.star+","+infor.link
         else:
             data = "detail@ "+infor.name+"@" + infor.outline+"@" + infor.popularity + \
                 "@" + infor.author+"@"+infor.link
-            print(data)
+            # print(data)
 
         cols.append(
             ImageCarouselColumn(
@@ -286,10 +286,10 @@ def crawlMovie(userId, reply_token, m_url, counter, m_type, m_text):
     global all_movie_infor
     all_movie_infor = []
     for i in range(counter-3, counter, 1):
-        print(page_from)
+        # print(page_from)
         inn_url = url.replace(page_from, "") + \
             movies[i].find("figure").find("a").get('href')
-        print(inn_url)
+        # print(inn_url)
         response = requests.get(inn_url)
         soup = BeautifulSoup(response.text, "html.parser")
         movie = soup.find("div", class_="movieMain")
@@ -308,15 +308,15 @@ def crawlMovie(userId, reply_token, m_url, counter, m_type, m_text):
         except:
             video = "https://www.youtube.com/embed/-RAdHJ-aquE"
 
-        print(image)
-        print(name)
-        print(date)
-        print(outline)
-        print(video)
+        # print(image)
+        # print(name)
+        # print(date)
+        # print(outline)
+        # print(video)
         all_movie_infor.append(MovieInfor(
             name, image, date, outline, inn_url, video, index))
 
-    print(all_movie_infor)
+    # print(all_movie_infor)
     send_image_carousel(all_movie_infor, userId, "Movie")
 
 
@@ -342,7 +342,7 @@ def crawlTV(userId, reply_token, TV_url, counter, m_type, m_text):
         outline = TVs[i].find("div", "texto").text
         star = TVs[i].find("div", "rating").text
         link = TVs[i].find("a").get('href')
-        # print(f"type={star}\nimage={type(star)}")
+        # # print(f"type={star}\nimage={type(star)}")
         all_infor.append(TVInfor(name, image, outline, star, link))
 
     send_image_carousel(all_infor, userId, "TV")
@@ -378,7 +378,7 @@ def crawlComic(userId, reply_token, comic_url, counter, c_type, c_text):
         author = comics[i].find("div", class_="who").find("a").text
         all_infor.append(ComicInfor(
             name, outline, popularity, image, author, inner_url))
-        print(name)
+        # print(name)
 
     send_image_carousel(all_infor, userId, "comic")
 

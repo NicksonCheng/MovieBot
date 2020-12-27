@@ -199,7 +199,7 @@ class TocMachine(GraphMachine):
         self.fight_counter += 3
 
     def on_enter_MovieDetail(self, event):
-        print(event.reply_token)
+        # # print(event.reply_token)
         text = event.postback.data
         infor = event.postback.data.split(',')
         infor.pop(0)
