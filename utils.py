@@ -11,6 +11,8 @@ channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
 watch_more_type = ""
 watch_more_text = ""
 all_movie_infor = []
+all_video_url = []
+video_counter = 0
 
 
 class MovieInfor:
@@ -64,17 +66,39 @@ def send_text_message(reply_token, text, watch_type):
     return "OK"
 
 
-def send_video_message(reply_token, movie_idx):
-    print(movie_idx)
-    global all_movie_infor
+def downloadYoutube(url):
+    global video_counter
+    yt = YouTube(url)
+    yt = yt.streams.filter(progressive=True, file_extension='mp4').order_by(
+        'resolution').desc().first()
+    if(not os.path.isdir("static")):
+        os.makedirs("static")
+    yt.download("static")
+    videos = os.listdir("static")
+    old_path = "static/"+videos[0]
+    print(old_path)
+    new_path = "static/video"+str(len(all_video_url))+".mp4"
 
+    try:
+        os.rename(old_path, new_path)
+    except Exception as e:
+        print("error")
+
+
+def send_video_message(reply_token, movie_idx):
+    global all_movie_infor
+    global all_video_url
+    video_url = all_movie_infor[int(movie_idx)].video
+    if(video_url not in all_video_url):
+        all_video_url.append(video_url)
+        downloadYoutube(video_url)
     line_bot_api = LineBotApi(channel_access_token)
     message = VideoSendMessage(
-        original_content_url=all_movie_infor[int(movie_idx)].video,
+        original_content_url="https://4f0651d08caa.ngrok.io/video" +
+        str(len(all_video_url))+".mp4",
         preview_image_url=all_movie_infor[int(movie_idx)].image,
 
     )
-    # shutil.rmtree("download")
 
     line_bot_api.reply_message(reply_token, message)
 
