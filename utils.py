@@ -82,7 +82,7 @@ def downloadYoutube(url):
     try:
         os.rename(old_path, new_path)
     except Exception as e:
-        # print("error")
+        print("error")
 
 
 def send_video_message(reply_token, movie_idx):
