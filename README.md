@@ -1,159 +1,32 @@
-# TOC Project 2020
+# Movie LineBot
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/dc7fa47fcd809b99d087/maintainability)](https://codeclimate.com/github/NCKU-CCS/TOC-Project-2020/maintainability)
 
 [![Known Vulnerabilities](https://snyk.io/test/github/NCKU-CCS/TOC-Project-2020/badge.svg)](https://snyk.io/test/github/NCKU-CCS/TOC-Project-2020)
 
 
-Template Code for TOC Project 2020
+Line Bot for watch TV,Movie,comic detail and trailer online
 
 A Line bot based on a finite state machine
+# Features
+## Choose type 
+Choose type you want to watch
+https://scontent.fkhh1-2.fna.fbcdn.net/v/t1.15752-9/s1080x2048/133291242_424520665406026_8760522118819644375_n.jpg?_nc_cat=109&ccb=2&_nc_sid=ae9488&_nc_ohc=kjsUN4fPYy0AX_W7Zt6&_nc_ht=scontent.fkhh1-2.fna&tp=7&oh=65a48ef911eabf5d578dfd531694dd47&oe=600D73E6
 
-More details in the [Slides](https://hackmd.io/@TTW/ToC-2019-Project#) and [FAQ](https://hackmd.io/s/B1Xw7E8kN)
-
-## Setup
-
-### Prerequisite
-* Python 3.6
-* Pipenv
-* Facebook Page and App
-* HTTPS Server
-
-#### Install Dependency
-```sh
-pip3 install pipenv
-
-pipenv --three
-
-pipenv install
-
-pipenv shell
-```
-
-* pygraphviz (For visualizing Finite State Machine)
-    * [Setup pygraphviz on Ubuntu](http://www.jianshu.com/p/a3da7ecc5303)
-	* [Note: macOS Install error](https://github.com/pygraphviz/pygraphviz/issues/100)
-
-
-#### Secret Data
-You should generate a `.env` file to set Environment Variables refer to our `.env.sample`.
-`LINE_CHANNEL_SECRET` and `LINE_CHANNEL_ACCESS_TOKEN` **MUST** be set to proper values.
-Otherwise, you might not be able to run your code.
-
-#### Run Locally
-You can either setup https server or using `ngrok` as a proxy.
-
-#### a. Ngrok installation
-* [ macOS, Windows, Linux](https://ngrok.com/download)
-
-or you can use Homebrew (MAC)
-```sh
-brew cask install ngrok
-```
-
-**`ngrok` would be used in the following instruction**
-
-```sh
-ngrok http 8000
-```
-
-After that, `ngrok` would generate a https URL.
-
-#### Run the sever
-
-```sh
-python3 app.py
-```
-
-#### b. Servo
-
-Or You can use [servo](http://serveo.net/) to expose local servers to the internet.
-
-
-## Finite State Machine
-![fsm](./img/show-fsm.png)
-
-## Usage
-The initial state is set to `user`.
-
-Every time `user` state is triggered to `advance` to another state, it will `go_back` to `user` state after the bot replies corresponding message.
-
-* user
-	* Input: "go to state1"
-		* Reply: "I'm entering state1"
-
-	* Input: "go to state2"
-		* Reply: "I'm entering state2"
-
-## Deploy
-Setting to deploy webhooks on Heroku.
-
-### Heroku CLI installation
-
-* [macOS, Windows](https://devcenter.heroku.com/articles/heroku-cli)
-
-or you can use Homebrew (MAC)
-```sh
-brew tap heroku/brew && brew install heroku
-```
-
-or you can use Snap (Ubuntu 16+)
-```sh
-sudo snap install --classic heroku
-```
-
-### Connect to Heroku
-
-1. Register Heroku: https://signup.heroku.com
-
-2. Create Heroku project from website
-
-3. CLI Login
-
-	`heroku login`
-
-### Upload project to Heroku
-
-1. Add local project to Heroku project
-
-	heroku git:remote -a {HEROKU_APP_NAME}
-
-2. Upload project
-
-	```
-	git add .
-	git commit -m "Add code"
-	git push -f heroku master
-	```
-
-3. Set Environment - Line Messaging API Secret Keys
-
-	```
-	heroku config:set LINE_CHANNEL_SECRET=your_line_channel_secret
-	heroku config:set LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token
-	```
-
-4. Your Project is now running on Heroku!
-
-	url: `{HEROKU_APP_NAME}.herokuapp.com/callback`
-
-	debug command: `heroku logs --tail --app {HEROKU_APP_NAME}`
-
-5. If fail with `pygraphviz` install errors
-
-	run commands below can solve the problems
-	```
-	heroku buildpacks:set heroku/python
-	heroku buildpacks:add --index 1 heroku-community/apt
-	```
-
-	refference: https://hackmd.io/@ccw/B1Xw7E8kN?type=view#Q2-如何在-Heroku-使用-pygraphviz
-
-## Reference
-[Pipenv](https://medium.com/@chihsuan/pipenv-更簡單-更快速的-python-套件管理工具-135a47e504f4) ❤️ [@chihsuan](https://github.com/chihsuan)
-
-[TOC-Project-2019](https://github.com/winonecheng/TOC-Project-2019) ❤️ [@winonecheng](https://github.com/winonecheng)
-
-Flask Architecture ❤️ [@Sirius207](https://github.com/Sirius207)
-
-[Line line-bot-sdk-python](https://github.com/line/line-bot-sdk-python/tree/master/examples/flask-echo)
+## Choose Movie/TV/Comic
+system will load three Movie/TV/Comic,choose you want!
+and when you tap the image,system will show the detail for Movie/TV/Comic
+https://scontent.fkhh1-1.fna.fbcdn.net/v/t1.15752-9/s1080x2048/133714463_3785150354880819_8133970736898187211_n.jpg?_nc_cat=105&ccb=2&_nc_sid=ae9488&_nc_ohc=o_mp20Q7lmMAX-d8YZt&_nc_ht=scontent.fkhh1-1.fna&tp=7&oh=712eb7d82e81cdbc545b2dcc74e1d8a2&oe=600D4C00
+https://scontent.fkhh1-2.fna.fbcdn.net/v/t1.15752-9/s1080x2048/133664522_734148687474717_2138755085777783845_n.jpg?_nc_cat=104&ccb=2&_nc_sid=ae9488&_nc_ohc=6NnTd5LlujkAX-QSgFK&_nc_ht=scontent.fkhh1-2.fna&tp=7&oh=6b95394e9e8b2ccbd25ec02b878df477&oe=600C7D28
+## Load more Movie/TV/Comic
+you can load more three Movie/TV/Comic for "更多新片"
+https://scontent.fkhh1-1.fna.fbcdn.net/v/t1.15752-9/s1080x2048/133663333_141856654380804_1599609999727458158_n.jpg?_nc_cat=100&ccb=2&_nc_sid=ae9488&_nc_ohc=z0pYd4RCJOAAX9cxGFz&_nc_ht=scontent.fkhh1-1.fna&tp=7&oh=fea26ae2648407d84381cea3ae01323a&oe=600EFF22
+## Watch Trail
+because movie is newest,so you only can see trailer
+Fortunately,I just help you to download movie into linebot
+so you can see movie trailer in line directly!
+https://scontent.fkhh1-2.fna.fbcdn.net/v/t1.15752-9/s1080x2048/133410869_1310574679316162_5514735823686397971_n.jpg?_nc_cat=107&ccb=2&_nc_sid=ae9488&_nc_ohc=VuqbIBq6wCsAX9eonG0&_nc_ht=scontent.fkhh1-2.fna&tp=7&oh=d15cf620f37ac47c26621783a7b410ca&oe=600F1603
+https://scontent.fkhh1-1.fna.fbcdn.net/v/t1.15752-9/s1080x2048/133554822_394500005157541_7805730114667447911_n.jpg?_nc_cat=106&ccb=2&_nc_sid=ae9488&_nc_ohc=xlCJUtF8bMkAX9mc3Je&_nc_ht=scontent.fkhh1-1.fna&tp=7&oh=357761a8b22af9f7ab07f6f438f0ba25&oe=600F0B15
+## Back to Main Page
+you can back to main page any time
+https://scontent.fkhh1-1.fna.fbcdn.net/v/t1.15752-9/s1080x2048/133552688_407007907214201_8578268570569951780_n.jpg?_nc_cat=100&ccb=2&_nc_sid=ae9488&_nc_ohc=h_xDYmWP7dsAX-iur15&_nc_ht=scontent.fkhh1-1.fna&tp=7&oh=efa13f7ad15a581a8e9a60c2bffe0179&oe=600FC941
