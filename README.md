@@ -11,7 +11,7 @@ A Line bot based on a finite state machine
 # Features
 ## Choose type 
 Choose type you want to watch
-https://scontent.fkhh1-2.fna.fbcdn.net/v/t1.15752-9/s1080x2048/133291242_424520665406026_8760522118819644375_n.jpg?_nc_cat=109&ccb=2&_nc_sid=ae9488&_nc_ohc=kjsUN4fPYy0AX_W7Zt6&_nc_ht=scontent.fkhh1-2.fna&tp=7&oh=65a48ef911eabf5d578dfd531694dd47&oe=600D73E6
+https://scontent.fkhh1-1.fna.fbcdn.net/v/t1.15752-9/s1080x2048/133552688_407007907214201_8578268570569951780_n.jpg?_nc_cat=100&ccb=2&_nc_sid=ae9488&_nc_ohc=h_xDYmWP7dsAX-iur15&_nc_ht=scontent.fkhh1-1.fna&tp=7&oh=efa13f7ad15a581a8e9a60c2bffe0179&oe=600FC941
 
 ## Choose Movie/TV/Comic
 system will load three Movie/TV/Comic,choose you want!
