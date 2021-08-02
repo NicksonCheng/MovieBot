@@ -15,7 +15,7 @@ A Line bot based on a finite state machine
 Choose type you want to watch
 
 <p align=center>
-    <img src="feature/mainPage.jpg" width="50" height="50">
+    <img src="feature/mainPage.jpg" width="150" height="150">
 </p>
 
 ## Choose Movie/TV/Comic
