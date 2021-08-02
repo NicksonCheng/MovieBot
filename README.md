@@ -30,17 +30,17 @@ and when you tap the image,system will show the detail for Movie/TV/Comic
 </p>
 ## detail for Movie/TV/Comic
 
-<p align=center>
-    <img src="feature/detail.jpg">
-    <img src="feature/detail2.jpg">
+<p>
+    <img src="feature/detail.jpg" width="350" height="auto>
+    <img src="feature/detail2.jpg" width="350" height="auto>
 </p>
 
 ## Load more Movie/TV/Comic
 
 you can load more three Movie/TV/Comic for "更多新片"
 
-<p align=center>
-    <img src="feature/loadmore.jpg">
+<p>
+    <img src="feature/loadmore.jpg" width="350" height="auto>
 </p>
 ## Watch Trail
 
